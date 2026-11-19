@@ -3,8 +3,13 @@ package eu.buildsouthwest.warp.core.database;
 import com.alpsbte.alpslib.io.database.DatabaseConnection;
 import com.alpsbte.alpslib.io.database.DatabaseSection;
 import eu.buildsouthwest.warp.WarpSystem;
+import eu.buildsouthwest.warp.core.command.CreateWarpCommand;
+import eu.buildsouthwest.warp.core.command.SetWarpCommand;
 import eu.buildsouthwest.warp.core.command.TestCommand;
 import eu.buildsouthwest.warp.util.WarpConfig;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -43,6 +48,19 @@ public class DatabaseService {
         });
 
         plugin.getCommand("test").setExecutor(new TestCommand(plugin));
+//        plugin.getCommand("create").setExecutor(new CreateWarpCommand(plugin));
+
+        CommandMap cmdMap = Bukkit.getServer().getCommandMap();
+        CreateWarpCommand createCmd = new CreateWarpCommand(plugin);
+//        SetWarpCommand setCmd = new SetWarpCommand(plugin);
+
+        Command create = cmdMap.getCommand("createwarp");
+        Command set =  cmdMap.getCommand("setwarp");
+        if (create != null) create.unregister(cmdMap);
+        if (set != null) set.unregister(cmdMap);
+
+        cmdMap.register("btewarp", createCmd);
+//        cmdMap.register("btewarp", setCmd);
 
         plugin.getLogger().info("Database initialization complete.");
     }

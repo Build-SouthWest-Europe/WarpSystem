@@ -12,7 +12,7 @@ public interface WarpConfig {
         default String username() { return "db_user"; }
         default String password() { return "change-me"; }
         default int maxLifetime() { return 1800000; }
-        default int connectionTimeout() { return 30000; }
+        default int connectionTimeout() { return 300; }
         default int keepaliveTime() { return 120000; }
         default int maximumPoolSize() { return 10; }
     }
