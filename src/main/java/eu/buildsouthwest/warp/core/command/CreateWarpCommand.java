@@ -2,7 +2,7 @@ package eu.buildsouthwest.warp.core.command;
 
 import eu.buildsouthwest.warp.WarpSystem;
 import eu.buildsouthwest.warp.core.api.ApiService;
-import eu.buildsouthwest.warp.core.database.WarpRepository;
+import eu.buildsouthwest.warp.core.database.DBWarpRepository;
 import eu.buildsouthwest.warp.core.model.Author;
 import eu.buildsouthwest.warp.core.model.GeoMetadata;
 import eu.buildsouthwest.warp.core.model.Warp;
@@ -30,13 +30,13 @@ public class CreateWarpCommand extends Command implements CommandExecutor {
     private final Component ERROR = Component.text("Failed to reach APIs for warp creation, please contact staff about this message.", NamedTextColor.RED);
     private final WarpSystem plugin;
     private final ApiService api;
-    private WarpRepository repo;
+    private DBWarpRepository repo;
 
     public CreateWarpCommand(WarpSystem plugin) {
         super("createwarp");
 
         this.plugin = plugin;
-        this.repo = new WarpRepository(plugin.getDatabaseService());
+        this.repo = new DBWarpRepository(plugin.getDatabaseService());
         this.api = new ApiService();
     }
 
@@ -86,7 +86,7 @@ public class CreateWarpCommand extends Command implements CommandExecutor {
                 Warp newWarp = new Warp(uuid, opt.get() + "_" + warpName, pl.getWorld().getName(), "", "warp", x, y, z, pitch, yaw, "minecraft:yellow_wool", geo, Optional.empty(), Optional.empty());
 
                 plugin.getLogger().info("[Warp_System_Create_Warp] Found geo and location data, sending to DB");
-                repo.newWarp(newWarp, newAuthor, geo.get());
+                repo.create(newWarp, newAuthor, geo.get());
             } catch (Exception e) {
                 pl.sendMessage(ERROR);
                 throw new RuntimeException(e);

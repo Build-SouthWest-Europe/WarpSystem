@@ -1,32 +1,30 @@
 package eu.buildsouthwest.warp.core.database;
 
 import eu.buildsouthwest.warp.core.model.*;
+import eu.buildsouthwest.warp.core.storage.WarpRepository;
 import org.bukkit.Bukkit;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.logging.Logger;
 
-public class WarpRepository {
+public class DBWarpRepository implements WarpRepository {
     private final String GET_WARP = "SELECT b.*, g.*, e.*, c.* FROM bte_warps b LEFT JOIN geo_meta g ON g.warpID = b.id LEFT JOIN educational e ON e.warpID = b.id LEFT JOIN city_hub c ON c .warpID = b.id WHERE b.id = ?;";
     private final String GET_WARPS = "SELECT b.*, g.*, e.*, c.* FROM bte_warps b LEFT JOIN geo_meta g ON g.warpID = b.id LEFT JOIN educational e ON e.warpID = b.id LEFT JOIN city_hub c ON c .warpID = b.id";
     private final String NEW_WARP = "INSERT IGNORE INTO bte_warps (id,`name`,world,`description`,`type`,`x`,`y`,`z`,pitch,yaw,icon,visits,creatorId,creationDate) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NOW());";
     private final String NEW_AUTHOR = "INSERT IGNORE INTO author (creatorId,creatorName) VALUES (?,?);";
     private final String NEW_GEO = "INSERT IGNORE INTO geo_meta (`warpId`, `latitude`, `longitude`, `state`) VALUES (?,?,?, '');";
-    private final String DROP_WARP = "DELETE FROM bte_warps WHERE = ?";
+    private final String DROP_WARP = "DELETE FROM bte_warps WHERE id = ?";
 
     private final DatabaseService db;
 
-    public WarpRepository(DatabaseService db){
+    public DBWarpRepository(DatabaseService db){
         this.db = db;
     }
 
-    public CompletableFuture<Optional<Warp>> getWarp(UUID warp) {
+    public CompletableFuture<Optional<Warp>> findByID(UUID warp) {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection conn = db.getConnection()){
                 if(conn == null) throw new SQLException("Could not connect to database.");
@@ -51,30 +49,26 @@ public class WarpRepository {
         }, db.executor());
     }
 
-    public CompletableFuture<List<Warp>> getAllWarps() {
-        List<Warp> warps = new ArrayList<>();
-
+    public CompletableFuture<Map<UUID, Warp>> getAllWarps() {
         return CompletableFuture.supplyAsync(() -> {
-            try (Connection conn = db.getConnection()){
-                if(conn == null) throw new SQLException("Could not connect to database.");
-                conn.setAutoCommit(false);
-
-                try (PreparedStatement query = conn.prepareStatement(GET_WARPS)) {
-                    ResultSet rs = query.executeQuery();
-
-                    while (rs.next()) warps.add(WarpWrapper.map(rs));
-                    return warps;
-                } catch (SQLException e) {
-                    throw new CompletionException(e);
+            Map<UUID, Warp> warps = new HashMap<>();
+            try (Connection conn = db.getConnection();
+                 PreparedStatement query = conn.prepareStatement(GET_WARPS);
+                 ResultSet res = query.executeQuery()){
+                while(res.next()){
+                    Warp w = WarpWrapper.map(res);
+                    warps.put(w.uuid(), w);
                 }
+
+                return warps;
             } catch (SQLException sqle) {
                 sqle.printStackTrace();
-                return warps;
+                throw new CompletionException(sqle);
             }
         }, db.executor());
     }
 
-    public CompletableFuture<Boolean> newWarp(Warp warp, Author auth, GeoMetadata geo) {
+    public CompletableFuture<Boolean> create(Warp warp, Author auth, GeoMetadata geo) {
         return CompletableFuture.supplyAsync( () -> {
             try (Connection conn = db.getConnection();){
                 if(conn == null) throw new SQLException("Could not connect to database.");
@@ -123,14 +117,14 @@ public class WarpRepository {
         }, db.executor());
     }
 
-    public CompletableFuture<Boolean> deleteWarp(String warp){
+    public CompletableFuture<Boolean> delete(Warp warp){
         return CompletableFuture.supplyAsync( () -> {
             try(Connection conn = db.getConnection()){
                 if(conn == null) throw new SQLException("Could not connect to database.");
                 conn.setAutoCommit(false);
 
                 try (PreparedStatement dropQuery = conn.prepareStatement(DROP_WARP)) {
-                    dropQuery.setString(1, warp);
+                    dropQuery.setString(1, warp.uuid().toString());
 
                     if (dropQuery.executeUpdate() >= 1) {
                         return true;

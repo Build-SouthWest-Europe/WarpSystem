@@ -25,10 +25,12 @@ dependencies {
     implementation("com.zaxxer:HikariCP:7.0.2")
     implementation("space.arim.dazzleconf:dazzleconf-core:2.0.0-M1")
     implementation("space.arim.dazzleconf:dazzleconf-yaml:2.0.0-M1")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.3.1")
+
     compileOnly("org.projectlombok:lombok:1.18.40")
     annotationProcessor("org.projectlombok:lombok:1.18.40")
-
     testAnnotationProcessor("org.projectlombok:lombok:1.18.40")
+
     // Use JUnit Jupiter for testing
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
