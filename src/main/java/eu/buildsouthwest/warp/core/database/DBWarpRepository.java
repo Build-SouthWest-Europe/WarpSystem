@@ -11,8 +11,8 @@ import java.util.concurrent.CompletionException;
 import java.util.logging.Logger;
 
 public class DBWarpRepository implements WarpRepository {
-    private final String GET_WARP = "SELECT b.*, g.*, e.*, c.* FROM bte_warps b LEFT JOIN geo_meta g ON g.warpID = b.id LEFT JOIN educational e ON e.warpID = b.id LEFT JOIN city_hub c ON c .warpID = b.id WHERE b.id = ?;";
-    private final String GET_WARPS = "SELECT b.*, g.*, e.*, c.* FROM bte_warps b LEFT JOIN geo_meta g ON g.warpID = b.id LEFT JOIN educational e ON e.warpID = b.id LEFT JOIN city_hub c ON c .warpID = b.id";
+    private final String GET_WARP = "SELECT b.*, a.*, g.*, e.*, c.* FROM bte_warps b LEFT JOIN author a ON a.creatorId = b.id LEFT JOIN geo_meta g ON g.warpID = b.id LEFT JOIN educational e ON e.warpID = b.id LEFT JOIN city_hub c ON c.warpID = b.id WHERE b.id = ?;";
+    private final String GET_WARPS = "SELECT b.*, a.*, g.*, e.*, c.* FROM bte_warps b LEFT JOIN author a ON a.creatorId = b.id LEFT JOIN geo_meta g ON g.warpID = b.id LEFT JOIN educational e ON e.warpID = b.id LEFT JOIN city_hub c ON c.warpID = b.id";
     private final String NEW_WARP = "INSERT IGNORE INTO bte_warps (id,`name`,world,`description`,`type`,`x`,`y`,`z`,pitch,yaw,icon,visits,creatorId,creationDate) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,NOW());";
     private final String NEW_AUTHOR = "INSERT IGNORE INTO author (creatorId,creatorName) VALUES (?,?);";
     private final String NEW_GEO = "INSERT IGNORE INTO geo_meta (`warpId`, `latitude`, `longitude`, `state`) VALUES (?,?,?, '');";
@@ -117,14 +117,14 @@ public class DBWarpRepository implements WarpRepository {
         }, db.executor());
     }
 
-    public CompletableFuture<Boolean> delete(Warp warp){
+    public CompletableFuture<Boolean> delete(UUID uuid){
         return CompletableFuture.supplyAsync( () -> {
             try(Connection conn = db.getConnection()){
                 if(conn == null) throw new SQLException("Could not connect to database.");
                 conn.setAutoCommit(false);
 
                 try (PreparedStatement dropQuery = conn.prepareStatement(DROP_WARP)) {
-                    dropQuery.setString(1, warp.uuid().toString());
+                    dropQuery.setString(1, uuid.toString());
 
                     if (dropQuery.executeUpdate() >= 1) {
                         return true;
@@ -190,7 +190,7 @@ final class EducationalDataMapper{
     private EducationalDataMapper(){}
 
     static Optional<EducationalData> map(ResultSet rs) throws SQLException {
-        String sj = rs.getString("e_warpId");
+        String sj = rs.getString("e.warpId");
         if(sj == null) return Optional.empty();
 
         return Optional.of(new EducationalData());
@@ -201,7 +201,7 @@ final class CityHubMapper{
     private CityHubMapper(){}
 
     static Optional<CityHubData> map(ResultSet rs) throws SQLException {
-        String sj = rs.getString("c_warpId");
+        String sj = rs.getString("c.warpId");
         if(sj == null) return Optional.empty();
 
         return Optional.of(new CityHubData());
@@ -211,7 +211,7 @@ final class CityHubMapper{
 final class AuthorMapper{
     private AuthorMapper(){}
     static Optional<Author> map(ResultSet rs) throws SQLException {
-        String authName = rs.getString("e_creatorName");
+        String authName = rs.getString("e.creatorName");
 
         if(authName == null) return Optional.empty();
         return Optional.of(new Author(UUID.fromString(rs.getString("a_creatorId")), authName));

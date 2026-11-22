@@ -19,6 +19,9 @@ commands:
   test:
     description: test the DB
     usage: /test
+  createwarp:
+    description: Create a new Warp in your position
+    usage: /createwarp <name>
 
 permissions:
   warp.test:

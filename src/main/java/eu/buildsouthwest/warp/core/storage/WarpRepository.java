@@ -15,7 +15,7 @@ public interface WarpRepository {
 
     CompletableFuture<Boolean> create(Warp warp, Author auth, GeoMetadata geo);
 
-    CompletableFuture<Boolean> delete(Warp warp);
+    CompletableFuture<Boolean> delete(UUID uuid);
 
     CompletableFuture<Map<UUID, Warp>> getAllWarps();
 }

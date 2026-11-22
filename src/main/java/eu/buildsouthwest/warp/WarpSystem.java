@@ -1,7 +1,13 @@
 package eu.buildsouthwest.warp;
 
 import com.alpsbte.alpslib.io.database.DatabaseConnection;
+import eu.buildsouthwest.warp.core.command.CreateWarpCommand;
+import eu.buildsouthwest.warp.core.command.SetWarpCommand;
+import eu.buildsouthwest.warp.core.database.DBWarpRepository;
 import eu.buildsouthwest.warp.core.database.DatabaseService;
+import eu.buildsouthwest.warp.core.storage.CaffeineWarpCache;
+import eu.buildsouthwest.warp.core.storage.WarpRepository;
+import eu.buildsouthwest.warp.core.storage.WarpService;
 import eu.buildsouthwest.warp.util.WarpConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 import space.arim.dazzleconf.Configuration;
@@ -17,6 +23,7 @@ public final class WarpSystem extends JavaPlugin {
     private static WarpSystem plugin;
     private static WarpConfig warpConfig;
     private static DatabaseService databaseService;
+    private static WarpService cacheService;
 
     @Override
     public void onEnable() {
@@ -50,8 +57,18 @@ public final class WarpSystem extends JavaPlugin {
             }
         }));
 
+        //Start DB bridge
         databaseService = new DatabaseService(this);
         databaseService.init();
+        WarpRepository repo = new DBWarpRepository(databaseService);
+        //Start and populate warp cache
+        cacheService = new WarpService(this, repo, new CaffeineWarpCache());
+        cacheService.refresh();
+        cacheService.startRefreshTask();
+
+        //Register warp commands
+        plugin.getCommand("createwarp").setExecutor(new CreateWarpCommand(plugin));
+//        plugin.getCommand("setwarp").setExecutor(new SetWarpCommand(plugin));
     }
 
     @Override
