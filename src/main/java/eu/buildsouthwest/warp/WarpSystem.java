@@ -1,8 +1,13 @@
 package eu.buildsouthwest.warp;
 
-import com.alpsbte.alpslib.io.database.DatabaseConfigPaths;
 import com.alpsbte.alpslib.io.database.DatabaseConnection;
-import com.alpsbte.alpslib.io.database.DatabaseSection;
+import eu.buildsouthwest.warp.core.command.CreateWarpCommand;
+import eu.buildsouthwest.warp.core.command.SetWarpCommand;
+import eu.buildsouthwest.warp.core.database.DBWarpRepository;
+import eu.buildsouthwest.warp.core.database.DatabaseService;
+import eu.buildsouthwest.warp.core.storage.CaffeineWarpCache;
+import eu.buildsouthwest.warp.core.storage.WarpRepository;
+import eu.buildsouthwest.warp.core.storage.WarpService;
 import eu.buildsouthwest.warp.util.WarpConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 import space.arim.dazzleconf.Configuration;
@@ -12,13 +17,14 @@ import space.arim.dazzleconf.backend.PathRoot;
 import space.arim.dazzleconf.backend.yaml.YamlBackend;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class WarpSystem extends JavaPlugin {
-
     private static WarpSystem plugin;
     private static WarpConfig warpConfig;
+    private static DatabaseService databaseService;
+    private static WarpService cacheService;
+
     @Override
     public void onEnable() {
         plugin = this;
@@ -37,6 +43,7 @@ public final class WarpSystem extends JavaPlugin {
 
         // Initialize Config
         getComponentLogger().info("Inizializing Config");
+        saveDefaultConfig();
         Configuration<WarpConfig> configuration = Configuration.defaultBuilder(WarpConfig.class).build();
         Path configPath = getDataPath().resolve("config.yml");
         Backend backend = new YamlBackend(new PathRoot(configPath));
@@ -50,45 +57,28 @@ public final class WarpSystem extends JavaPlugin {
             }
         }));
 
+        //Start DB bridge
+        databaseService = new DatabaseService(this);
+        databaseService.init();
+        WarpRepository repo = new DBWarpRepository(databaseService);
+        //Start and populate warp cache
+        cacheService = new WarpService(this, repo, new CaffeineWarpCache());
+        cacheService.refresh();
+        cacheService.startRefreshTask();
 
-
-
-
-        // Initialize Database Connection
-        getComponentLogger().info("Initializing the Database Connection...");
-        try {
-            initDatabase();
-            getComponentLogger().info("SQL database connection Started!");
-        } catch (Exception e) {
-            getComponentLogger().error("Could not initialize database connection.", e);
-            this.getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
-
+        //Register warp commands
+        plugin.getCommand("createwarp").setExecutor(new CreateWarpCommand(plugin));
+//        plugin.getCommand("setwarp").setExecutor(new SetWarpCommand(plugin));
     }
 
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        DatabaseConnection.shutdown();
     }
 
     public static WarpConfig getWarpConfig() {
         return warpConfig;
     }
-
-    private void initDatabase() {
-        WarpConfig config = getWarpConfig();
-        DatabaseSection databaseSection = new DatabaseSection(config.database().url(),
-                config.database().dbname(),
-                config.database().username(),
-                config.database().password(),
-                config.database().maxLifetime(),
-                config.database().connectionTimeout(),
-                config.database().keepaliveTime(),
-                config.database().maximumPoolSize(),
-                0,
-                "plotsystem-hikari");
-        DatabaseConnection.initializeDatabase(databaseSection, true);
-    }
+    public static DatabaseService getDatabaseService() { return databaseService; }
 }

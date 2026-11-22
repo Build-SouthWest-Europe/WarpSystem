@@ -1,5 +1,7 @@
 package eu.buildsouthwest.warp.core.storage;
 
+import eu.buildsouthwest.warp.core.model.Author;
+import eu.buildsouthwest.warp.core.model.GeoMetadata;
 import eu.buildsouthwest.warp.core.model.Warp;
 
 import java.util.Map;
@@ -11,9 +13,9 @@ public interface WarpRepository {
 
     CompletableFuture<Optional<Warp>> findByID(UUID id);
 
-    CompletableFuture<Void> save(Warp warp);
+    CompletableFuture<Boolean> create(Warp warp, Author auth, GeoMetadata geo);
 
-    CompletableFuture<Void> delete(Warp warp);
+    CompletableFuture<Boolean> delete(UUID uuid);
 
-    CompletableFuture<Map<UUID, Warp>> loadAllAsync();
+    CompletableFuture<Map<UUID, Warp>> getAllWarps();
 }
