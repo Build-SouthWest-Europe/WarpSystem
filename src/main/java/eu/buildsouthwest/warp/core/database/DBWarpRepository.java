@@ -168,6 +168,7 @@ final class WarpWrapper {
                 rs.getFloat("pitch"),
                 rs.getFloat("yaw"),
                 rs.getString("icon"),
+                AuthorMapper.map(rs),
                 GeoMetaWrapper.map(rs),
                 EducationalDataMapper.map(rs),
                 CityHubMapper.map(rs)
