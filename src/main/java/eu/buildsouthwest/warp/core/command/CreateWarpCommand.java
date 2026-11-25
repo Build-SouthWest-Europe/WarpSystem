@@ -59,8 +59,8 @@ public class CreateWarpCommand extends Command implements CommandExecutor {
         double x = Math.round(pl.getLocation().getX() * 100.0) / 100.0;
         double y = Math.round(pl.getLocation().getY() * 100.0) / 100.0;
         double z = Math.round(pl.getLocation().getZ() * 100.0) / 100.0;
-        double pitch = Math.round(pl.getLocation().getPitch() * 100.0) / 100.0;
-        double yaw = Math.round(pl.getLocation().getYaw() * 100.0) / 100.0;
+        float pitch = (float) (Math.round(pl.getLocation().getPitch() * 100.0) / 100.0);
+        float yaw = (float) (Math.round(pl.getLocation().getYaw() * 100.0) / 100.0);
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try{

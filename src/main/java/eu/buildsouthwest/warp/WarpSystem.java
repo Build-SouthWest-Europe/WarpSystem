@@ -3,6 +3,7 @@ package eu.buildsouthwest.warp;
 import com.alpsbte.alpslib.io.database.DatabaseConnection;
 import eu.buildsouthwest.warp.core.command.CreateWarpCommand;
 import eu.buildsouthwest.warp.core.command.SetWarpCommand;
+import eu.buildsouthwest.warp.core.command.WarpCommand;
 import eu.buildsouthwest.warp.core.database.DBWarpRepository;
 import eu.buildsouthwest.warp.core.database.DatabaseService;
 import eu.buildsouthwest.warp.core.storage.CaffeineWarpCache;
@@ -69,6 +70,7 @@ public final class WarpSystem extends JavaPlugin {
         //Register warp commands
         plugin.getCommand("createwarp").setExecutor(new CreateWarpCommand(plugin));
 //        plugin.getCommand("setwarp").setExecutor(new SetWarpCommand(plugin));
+        plugin.getCommand("warp").setExecutor(new WarpCommand(plugin));
     }
 
     @Override
@@ -81,4 +83,5 @@ public final class WarpSystem extends JavaPlugin {
         return warpConfig;
     }
     public static DatabaseService getDatabaseService() { return databaseService; }
+    public WarpService getCacheService() { return cacheService; }
 }

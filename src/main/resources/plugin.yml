@@ -22,6 +22,12 @@ commands:
   createwarp:
     description: Create a new Warp in your position
     usage: /createwarp <name>
+  setwarp:
+    description: Edit some value of an existing warp
+    usage: /createwarp <field> [value]
+  warp:
+    description: Travel to one of our highlighted builds
+    usage: /warp <warp>
 
 permissions:
   warp.test:

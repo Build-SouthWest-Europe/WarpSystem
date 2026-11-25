@@ -89,8 +89,8 @@ public class DBWarpRepository implements WarpRepository {
                     queryWarp.setDouble(6, warp.x());
                     queryWarp.setDouble(7, warp.y());
                     queryWarp.setDouble(8, warp.z());
-                    queryWarp.setDouble(9, warp.pitch());
-                    queryWarp.setDouble(10, warp.yaw());
+                    queryWarp.setFloat(9, warp.pitch());
+                    queryWarp.setFloat(10, warp.yaw());
                     queryWarp.setString(11, warp.icon());
                     queryWarp.setInt(12, 0);
                     queryWarp.setString(13, auth.id().toString());
@@ -165,8 +165,8 @@ final class WarpWrapper {
                 rs.getDouble("x"),
                 rs.getDouble("y"),
                 rs.getDouble("z"),
-                rs.getDouble("pitch"),
-                rs.getDouble("yaw"),
+                rs.getFloat("pitch"),
+                rs.getFloat("yaw"),
                 rs.getString("icon"),
                 GeoMetaWrapper.map(rs),
                 EducationalDataMapper.map(rs),
