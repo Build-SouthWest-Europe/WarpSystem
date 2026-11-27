@@ -15,6 +15,7 @@ public record Warp(
         float pitch,
         float yaw,
         String icon,
+        Optional<Author> author,
         Optional<GeoMetadata> geoMetadata,
         Optional<EducationalData> eduData,
         Optional<CityHubData> cityHubData
