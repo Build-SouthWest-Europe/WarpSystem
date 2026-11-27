@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "eu.buildsouthwest"
-version = "0.1-Alpha"
+version = "0.2-Alpha"
 
 repositories {
     mavenCentral()
@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:26.1.2.build.72-stable")
+    compileOnly("io.papermc.paper:paper-api:26.3.build.+")
     implementation("com.alpsbte.alpslib:alpslib-io:1.2.5")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.11")
     implementation("com.zaxxer:HikariCP:7.0.2")
